@@ -1,1 +1,22 @@
-.
+**-Given a data set-**  
+First, I read the mushroom data set ,which is called agaricus-lepiota.data, using pandas_read_table. In the data, there are 8124 rows and 23 columns. 23 columns contain 22 features and one for (Y value) edibility.  
+**Features**: cap-shape, cap-surface, cap-color, bruises, odor, gill-attachment, gill-spacing, gill-size, gill-color, stalk-shape, stalk-root, stalk-surface-above-ring, stalk-surface-below-ring, stalk-color-above-ring, stalk-color-below-ring, veil-type, veil-color, ring-number, ring-type, spore-print-color, population", habitat   
+**Label**: edibility  
+After the data processing, remove rows which contains "?" (missing) value, it has 5664 rows.   
+**edibility**: e(edible), p(poisonous)  
+  
+I import the Pandas, NumPy and math libraires. The Pandas library is used in data manipulation, while the NumPy and math libraries are utilized for mathematical calculations or finding unique values and counts. I used for loops to remove missing value "?", then the data has 5644 rows.  
+I divide the dataset into the training and test sets, choose a 70% for training and 30% for test. Used sample() to have random order of the data before spliting.  
+  
+**-trains the tree-**  
+To find our model performance, it is necessary to divide the dataset into training and testing sets, and a 70% (for train_df) and 30% (for test_df) train-validation split is chosen. I used the ID3 algorithm, where at each node, a feature is chosen to split the decision tree into different subsets. The attribute chosen has the highest information gain.  
+Entropy is used to measure the impurity in a group and is calculated using the formula: H(Y) = -$\sum_{Y=1}^n p_Y \times log2 (p_Y)$. A calc_entropy(train_df, col_name) function is used to calculate the entropy of the training data frame (or part of the training data frame).  
+
+A calc_IG (train_df, attribute_name, Ycol_name) function is used to measure the information gain of each attribute. Information gain is used to measure the difference between the entropy of the dataset before and after a split, using the formula: Information Gain = H(Y) − H(Y|X), where H(Y|X) = P(X=x) $\times$ -(P(Y=y|X=x) log2 P(Y=y|X=x)). Then we use a find_highest_IG(train_df, Ycol_name) function to find the attribute which has the highest IG. If there are multiple features with the same highest information gain value, we can choose any of them as the splitting attribute. In this case, I choose the first attribute as the (root) node. When a feature is selected, the decision tree is split into the number of different values that the feature contains.
+
+The above steps are repeated to generate the decision tree. After each split, the node feature is removed from the train data frame. The splitting process is continuing until information gain is 0, there are no more attributes to split on, or when the stopping depth is reached. A stopping_depth(depth) function is used to stop the decision tree algorithm when it reaches the given depth. The function uses the majority rule if it is not a pure leaf. You can see the two different decision trees by stopping_depth(2), stopping_depth(3), or stopping_depth(4).  
+
+The resulting decision tree is in the form of a dictionary, where the root of the tree is the 'odor' feature and has a depth of 3 (Please see the Task2 A decision tree if you need further information). The value of each key corresponds to the value of the feature, and edibility is at the end of each nested dictionary. A decision_tree(train_df, Ycol_name, tree = None) function is used to generate and print the decision tree. 
+
+**-applies the tree to data, calculates a performance measure-**  
+The decision tree can now be used for prediction by recursively traversing the nested dictionary until it reaches the leaf node where the edibility is found or it is no more dictionary type. The test_df(30% of cleaned data frame) is used in a test(tree, test_df, Ycol_name) function to find the accuracy, using the formula: TP/total(TP+FP). To calculate the number of true positive values, the check_TP(tree, splitted_df, Ycol_name) function is used. The function compares the prediction and actual value. If two values are the same, it returns 1 so we can increase the true positive count. Otherwise, it returns 0. The result of testing indicates that our training model has 100% accuracy with the test data. However, if we change the data set, we cannot guarantee the accuracy percentage would be 100% also.  
